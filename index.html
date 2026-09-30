@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Materials Distribution Tracker</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- PapaParse for parsing CSV -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
+    <!-- Alpine.js -->
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+</head>
+<body class="bg-slate-100 font-sans antialiased text-slate-800 selection:bg-indigo-500 selection:text-white" x-data="trackerApp()">
+
+    <div class="max-w-md mx-auto min-h-screen bg-white shadow-2xl flex flex-col justify-between overflow-hidden border-x border-slate-200">
+        
+        <!-- Header -->
+        <header class="bg-gradient-to-r from-indigo-600 via-indigo-700 to-blue-600 text-white p-5 text-center shadow-lg rounded-b-3xl relative">
+            <h1 class="text-xl font-black tracking-tight">Materials Tracker</h1>
+            <p class="text-xs text-indigo-100 mt-0.5 font-medium opacity-90">Distribution & Status System</p>
+        </header>
+
+        <!-- Main Content Area -->
+        <main class="p-5 flex-grow flex flex-col justify-center">
+
+            <!-- LOADING SPINNER -->
+            <div x-show="loading" class="flex flex-col items-center justify-center py-12">
+                <div class="relative w-14 h-14">
+                    <div class="absolute inset-0 rounded-full border-4 border-indigo-500/20"></div>
+                    <div class="absolute inset-0 rounded-full border-4 border-indigo-500 border-t-transparent animate-spin"></div>
+                </div>
+                <p class="mt-4 text-sm font-semibold text-slate-500 tracking-wide" x-text="loadingText"></p>
+            </div>
+
+            <!-- ERROR MESSAGE -->
+            <div x-show="errorMsg" class="bg-rose-50 border border-rose-200 text-rose-600 p-4 rounded-2xl text-center text-xs mb-4 shadow-sm">
+                <p class="font-bold mb-1">⚠️ Connection Notice</p>
+                <p x-text="errorMsg"></p>
+            </div>
+
+            <!-- SCREEN 1: SELECT STUDENT & STATUS SECTION -->
+            <div x-show="!loading && screen === 1" class="space-y-5">
+                <div>
+                    <label class="block text-xs font-bold uppercase tracking-widest text-indigo-600 mb-2.5">Select Student Name</label>
+                    
+                    <!-- Clean Dropdown -->
+                    <div class="relative">
+                        <select x-model="selectedStudentName" @change="selectStudent" class="w-full p-4 border border-slate-200 rounded-2xl bg-slate-50 text-slate-900 shadow-sm focus:ring-2 focus:ring-indigo-500 focus:bg-white focus:outline-none text-base font-medium appearance-none transition">
+                            <option value="">-- Choose from <span x-text="students.length"></span> students --</option>
+                            <template x-for="student in students" :key="student.name">
+                                <option :value="student.name" x-text="student.name + ' (' + student.classVal + ')'"></option>
+                            </template>
+                        </select>
+                        <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4 text-indigo-600">
+                            <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 9l-7 7-7-7"></path></svg>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Status Section Dashboard -->
+                <div class="bg-slate-50 border border-slate-200 rounded-2xl p-4 space-y-3 shadow-sm">
+                    <div class="flex items-center justify-between border-b border-slate-200 pb-2">
+                        <span class="text-xs font-bold uppercase tracking-wider text-indigo-600">📊 Status Section</span>
+                        <span class="text-[10px] bg-indigo-100 text-indigo-700 px-2 py-0.5 rounded-full font-semibold">Live</span>
+                    </div>
+                    <div class="grid grid-cols-2 gap-3 text-center">
+                        <div class="bg-white p-3 rounded-xl border border-slate-200 shadow-sm">
+                            <p class="text-xs text-slate-500 font-medium">Total Distributed</p>
+                            <p class="text-lg font-black text-emerald-600 mt-1" x-text="totalDistributedCanvas">0</p>
+                        </div>
+                        <div class="bg-white p-3 rounded-xl border border-slate-200 shadow-sm">
+                            <p class="text-xs text-slate-500 font-medium">Total Needed</p>
+                            <p class="text-lg font-black text-indigo-600 mt-1" x-text="totalNeededCanvas">0</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-indigo-50 border border-indigo-100 rounded-2xl p-4 text-center text-xs text-indigo-900 leading-relaxed font-medium">
+                    ✨ Select a student from the dropdown above to manage material distribution.
+                </div>
+            </div>
+
+            <!-- SCREEN 2: VERIFICATION & SMART LOCKED TOGGLES -->
+            <div x-show="!loading && screen === 2" class="space-y-5">
+                
+                <!-- Verification Badge Card -->
+                <div class="bg-gradient-to-br from-indigo-900 via-slate-900 to-indigo-950 text-white rounded-3xl p-5 shadow-xl relative overflow-hidden">
+                    <div class="absolute -right-10 -bottom-10 w-32 h-32 bg-indigo-500/10 rounded-full blur-2xl"></div>
+                    
+                    <div class="flex items-center space-x-4 relative z-10">
+                        <!-- Photo with Payment Verified Badge -->
+                        <div class="relative flex-shrink-0">
+                            <img :src="currentStudent.photo || 'https://via.placeholder.com/90?text=Photo'" 
+                                 @error="$event.target.src='https://via.placeholder.com/90?text=Error'"
+                                 alt="Student Photo" 
+                                 class="w-20 h-20 rounded-2xl object-cover border-2 border-emerald-400 shadow-lg bg-slate-800">
+                            <span class="absolute -bottom-2.5 -right-2 bg-emerald-500 text-slate-950 text-[9px] font-black px-2 py-0.5 rounded-full shadow-md border border-slate-900 tracking-wider uppercase">
+                                Verified
+                            </span>
+                        </div>
+
+                        <!-- Details -->
+                        <div class="overflow-hidden flex-grow">
+                            <span class="inline-block bg-emerald-500/20 text-emerald-300 text-[10px] px-2.5 py-0.5 rounded-md font-bold mb-1 uppercase tracking-wider border border-emerald-500/30">
+                                Payment Done ✓
+                            </span>
+                            <h2 class="text-base font-bold text-white truncate" x-text="currentStudent.name"></h2>
+                            <p class="text-xs text-slate-300 mt-0.5">Class: <span class="font-semibold text-white" x-text="currentStudent.classVal"></span></p>
+                            <p class="text-xs text-slate-300">Fee: ₹<span class="font-semibold text-emerald-400" x-text="currentStudent.fee"></span> <span class="text-[11px] text-slate-400" x-text="'(' + currentStudent.paymentMode + ')'"></span></p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ALREADY DISTRIBUTED WARNING BANNER -->
+                <div x-show="studentHistory.length > 0" class="bg-amber-50 border border-amber-200 rounded-2xl p-3.5 space-y-1.5 shadow-sm">
+                    <div class="flex items-center space-x-2 text-amber-700 text-xs font-bold uppercase tracking-wider">
+                        <span>⚠️️ Previously Distributed Items Locked</span>
+                    </div>
+                    <p class="text-[11px] text-amber-800">Items already given to this student have been automatically disabled.</p>
+                </div>
+
+                <!-- High-Performance Smart Toggles -->
+                <div class="space-y-3">
+                    <label class="block text-xs font-bold uppercase tracking-widest text-indigo-600">Select Distribution Items</label>
+                    
+                    <!-- Toggle 1 (Canvas 1) -->
+                    <div @click="!alreadyHasCanvas1 && (canvas1 = !canvas1)" class="flex items-center justify-between p-3.5 border rounded-2xl shadow-sm transition-all select-none"
+                         :class="alreadyHasCanvas1 ? 'bg-slate-100 border-slate-200 opacity-60 cursor-not-allowed' : 'bg-slate-50 border-slate-200 cursor-pointer active:scale-[0.99] hover:border-indigo-400'">
+                        <div class="flex items-center space-x-3.5">
+                            <div class="w-9 h-9 rounded-xl bg-indigo-100 text-indigo-600 flex items-center justify-center font-bold text-sm border border-indigo-200">C1</div>
+                            <div>
+                                <span class="font-semibold text-slate-800 text-sm">Canvas 1</span>
+                                <span x-show="alreadyHasCanvas1" class="block text-[10px] text-amber-600 font-bold uppercase tracking-wider">Already Given ✓</span>
+                            </div>
+                        </div>
+                        <div class="w-14 h-8 flex items-center rounded-full p-1 transition-colors duration-300" :class="canvas1 ? 'bg-indigo-600' : 'bg-slate-300'">
+                            <div class="bg-white w-6 h-6 rounded-full shadow-md transform transition-transform duration-300" :class="canvas1 ? 'translate-x-6' : 'translate-x-0'"></div>
+                        </div>
+                    </div>
+
+                    <!-- Toggle 2 (Canvas 2) -->
+                    <div @click="!alreadyHasCanvas2 && (canvas2 = !canvas2)" class="flex items-center justify-between p-3.5 border rounded-2xl shadow-sm transition-all select-none"
+                         :class="alreadyHasCanvas2 ? 'bg-slate-100 border-slate-200 opacity-60 cursor-not-allowed' : 'bg-slate-50 border-slate-200 cursor-pointer active:scale-[0.99] hover:border-indigo-400'">
+                        <div class="flex items-center space-x-3.5">
+                            <div class="w-9 h-9 rounded-xl bg-blue-100 text-blue-600 flex items-center justify-center font-bold text-sm border border-blue-200">C2</div>
+                            <div>
+                                <span class="font-semibold text-slate-800 text-sm">Canvas 2</span>
+                                <span x-show="alreadyHasCanvas2" class="block text-[10px] text-amber-600 font-bold uppercase tracking-wider">Already Given ✓</span>
+                            </div>
+                        </div>
+                        <div class="w-14 h-8 flex items-center rounded-full p-1 transition-colors duration-300" :class="canvas2 ? 'bg-indigo-600' : 'bg-slate-300'">
+                            <div class="bg-white w-6 h-6 rounded-full shadow-md transform transition-transform duration-300" :class="canvas2 ? 'translate-x-6' : 'translate-x-0'"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="space-y-2.5 pt-1">
+                    <button @click="submitData" :disabled="submitting || (alreadyHasCanvas1 && alreadyHasCanvas2)" 
+                            class="w-full font-bold py-3.5 px-4 rounded-2xl shadow-lg transition-all flex items-center justify-center text-base"
+                            :class="(alreadyHasCanvas1 && alreadyHasCanvas2) ? 'bg-slate-200 text-slate-400 cursor-not-allowed shadow-none' : 'bg-gradient-to-r from-indigo-600 to-blue-600 hover:from-indigo-500 hover:to-blue-500 active:scale-[0.98] text-white shadow-indigo-600/20'">
+                        <span x-show="submitting" class="animate-spin rounded-full h-5 w-5 border-2 border-white border-t-transparent mr-2.5"></span>
+                        <span x-text="(alreadyHasCanvas1 && alreadyHasCanvas2) ? 'All Items Already Distributed' : (submitting ? 'Submitting Record...' : 'Submit Data')"></span>
+                    </button>
+                    <button @click="resetForm" class="w-full bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold py-3 px-4 rounded-2xl border border-slate-200 transition text-sm">
+                        Change Student
+                    </button>
+                </div>
+            </div>
+
+            <!-- SUCCESS SCREEN -->
+            <div x-show="!loading && screen === 3" class="text-center py-12 space-y-4">
+                <div class="w-20 h-20 bg-emerald-100 border border-emerald-200 text-emerald-600 rounded-3xl flex items-center justify-center mx-auto text-4xl shadow-inner font-bold">✓</div>
+                <div>
+                    <h2 class="text-xl font-bold text-slate-900">Successfully Submitted!</h2>
+                    <p class="text-xs text-slate-500 mt-1">Record successfully saved to Google Sheet 1.</p>
+                </div>
+                <div class="pt-6">
+                    <button @click="resetForm" class="w-full bg-gradient-to-r from-indigo-600 to-blue-600 hover:from-indigo-500 hover:to-blue-500 active:scale-[0.98] text-white font-bold py-4 px-4 rounded-2xl shadow-lg shadow-indigo-600/20 transition-all text-base">
+                        Add Another Student Record
+                    </button>
+                </div>
+            </div>
+
+        </main>
+
+        <!-- Footer -->
+        <footer class="p-4 text-center text-xs text-slate-500 border-t border-slate-200 font-medium bg-slate-50">
+            Materials Distribution Tracker &copy; 2026 | Made by <span class="font-bold text-indigo-600">Darpan Sukla</span>
+        </footer>
+    </div>
+
+    <!-- Application Script -->
+    <script>
+        function trackerApp() {
+            return {
+                loading: true,
+                loadingText: 'Loading database & status...',
+                errorMsg: '',
+                screen: 1, 
+                students: [],
+                historyRecords: [],
+                studentHistory: [],
+                alreadyHasCanvas1: false,
+                alreadyHasCanvas2: false,
+                selectedStudentName: '',
+                currentStudent: {},
+                canvas1: false,
+                canvas2: false,
+                submitting: false,
+                scriptURL: 'https://script.google.com/macros/s/AKfycbynakTEK9vajsj-Yx6V9jTwRKWI70Whlfl_NmN4j6Fi_QHHOsjY4vI9phHzneDQ0JIN/exec',
+
+                init() {
+                    const csvStudentsUrl = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRPkHc9ph04i3PFILd6jh1vA_nJ5adJJjYhkBHS-_JpPd6ZH1e0DXMLk1ma1wo1YzzXjiYf7pbDikfS/pub?gid=804557737&single=true&output=csv';
+                    const csvHistoryUrl = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSejgx8WMzQp1PGGPKi42eYOXtCrlpeBRTx3A8XaR1ie3GpyGvRXh0SPmzTKx4fpHr7tGlYikjncKEs/pub?gid=0&single=true&output=csv';
+
+                    Promise.all([
+                        new Promise((resolve) => Papa.parse(csvStudentsUrl, { download: true, header: true, skipEmptyLines: true, transformHeader: h => h.trim(), complete: res => resolve(res.data) })),
+                        new Promise((resolve) => Papa.parse(csvHistoryUrl, { download: true, header: true, skipEmptyLines: true, transformHeader: h => h.trim(), complete: res => resolve(res.data) }))
+                    ]).then(([studentData, historyData]) => {
+                        this.loading = false;
+                        
+                        if (studentData && studentData.length > 0) {
+                            this.students = studentData
+                                .filter(row => row['Student Name'] && row['Student Name'].trim() !== '')
+                                .map(row => {
+                                    let rawPhoto = row['Student Photo'] ? row['Student Photo'].trim() : '';
+                                    if (rawPhoto.includes('drive.google.com/file/d/')) {
+                                        const match = rawPhoto.match(/\/file\/d\/([a-zA-Z0-9_-]+)/);
+                                        if (match && match[1]) rawPhoto = `https://lh3.googleusercontent.com/d/${match[1]}=s220`;
+                                    }
+                                    return {
+                                        name: row['Student Name'].trim(),
+                                        fee: row['Material Fee'] || '',
+                                        paymentMode: row['Payment Mode'] || '',
+                                        photo: rawPhoto,
+                                        classVal: row['Class'] || ''
+                                    };
+                                });
+                        }
+
+                        if (historyData && historyData.length > 0) {
+                            this.historyRecords = historyData.filter(row => row['Student Name'] && row['Student Name'].trim() !== '');
+                        }
+                    }).catch(() => {
+                        this.loading = false;
+                        this.errorMsg = 'Failed to load feeds. Check Google Sheet publishing links.';
+                    });
+                },
+
+                get totalDistributedCanvas() {
+                    let count = 0;
+                    this.historyRecords.forEach(h => {
+                        if (h['Canvas 1'] && h['Canvas 1'].trim().toLowerCase() === 'yes') count++;
+                        if (h['Canvas 2'] && h['Canvas 2'].trim().toLowerCase() === 'yes') count++;
+                    });
+                    return count;
+                },
+
+                get totalNeededCanvas() {
+                    let totalPossible = this.students.length * 2;
+                    return Math.max(0, totalPossible - this.totalDistributedCanvas);
+                },
+
+                selectStudent() {
+                    if (!this.selectedStudentName) return;
+                    this.currentStudent = this.students.find(s => s.name === this.selectedStudentName) || {};
+                    
+                    this.studentHistory = this.historyRecords.filter(h => 
+                        h['Student Name'] && h['Student Name'].trim().toLowerCase() === this.selectedStudentName.toLowerCase()
+                    );
+
+                    this.alreadyHasCanvas1 = this.studentHistory.some(h => h['Canvas 1'] && h['Canvas 1'].trim().toLowerCase() === 'yes');
+                    this.alreadyHasCanvas2 = this.studentHistory.some(h => h['Canvas 2'] && h['Canvas 2'].trim().toLowerCase() === 'yes');
+
+                    this.canvas1 = false;
+                    this.canvas2 = false;
+                    this.screen = 2;
+                },
+
+                submitData() {
+                    if (!this.canvas1 && !this.canvas2) {
+                        alert('Please select at least Canvas 1 or Canvas 2.');
+                        return;
+                    }
+
+                    this.submitting = true;
+                    const payload = {
+                        studentName: this.currentStudent.name,
+                        materialFee: this.currentStudent.fee,
+                        paymentMode: this.currentStudent.paymentMode,
+                        classVal: this.currentStudent.classVal,
+                        canvas1: this.canvas1,
+                        canvas2: this.canvas2
+                    };
+
+                    fetch(this.scriptURL, {
+                        method: 'POST',
+                        body: JSON.stringify(payload)
+                    })
+                    .then(res => res.json())
+                    .then(() => {
+                        this.submitting = false;
+                        
+                        // INSTANTLY update local history cache so Status Section updates right away
+                        this.historyRecords.push({
+                            'Student Name': this.currentStudent.name,
+                            'Canvas 1': this.canvas1 ? 'Yes' : 'No',
+                            'Canvas 2': this.canvas2 ? 'Yes' : 'No'
+                        });
+
+                        this.screen = 3;
+                    })
+                    .catch(() => {
+                        this.submitting = false;
+                        alert('Network error during submission.');
+                    });
+                },
+
+                resetForm() {
+                    this.selectedStudentName = '';
+                    this.currentStudent = {};
+                    this.studentHistory = [];
+                    this.alreadyHasCanvas1 = false;
+                    this.alreadyHasCanvas2 = false;
+                    this.canvas1 = false;
+                    this.canvas2 = false;
+                    this.screen = 1;
+                }
+            }
+        }
+    </script>
+</body>
+</html>
