@@ -16,9 +16,22 @@
     <div class="max-w-md mx-auto min-h-screen bg-white shadow-2xl flex flex-col justify-between overflow-hidden border-x border-slate-200">
         
         <!-- Header -->
-        <header class="bg-gradient-to-r from-indigo-600 via-indigo-700 to-blue-600 text-white p-5 text-center shadow-lg rounded-b-3xl relative">
-            <h1 class="text-xl font-black tracking-tight">Materials Tracker</h1>
-            <p class="text-xs text-indigo-100 mt-0.5 font-medium opacity-90">Distribution & Status System</p>
+        <header class="bg-gradient-to-r from-indigo-600 via-indigo-700 to-blue-600 text-white p-5 shadow-lg rounded-b-3xl relative flex items-center justify-between">
+            <div>
+                <h1 class="text-xl font-black tracking-tight">Materials Tracker</h1>
+                <p class="text-xs text-indigo-100 mt-0.5 font-medium opacity-90">Distribution & Status System</p>
+            </div>
+            <div class="flex items-center space-x-2">
+                <!-- Pending Canvas List Icon Button -->
+                <button @click="openModal('pending')" class="w-10 h-10 rounded-xl bg-white/10 hover:bg-white/20 border border-white/20 flex items-center justify-center text-white transition shadow-sm relative" title="Pending Canvas List">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                    <span x-show="pendingStudents.length > 0" class="absolute -top-1 -right-1 bg-rose-500 text-white text-[10px] font-bold w-4 h-4 rounded-full flex items-center justify-center" x-text="pendingStudents.length"></span>
+                </button>
+                <!-- Distributed Canvas List Icon Button -->
+                <button @click="openModal('distributed')" class="w-10 h-10 rounded-xl bg-white/10 hover:bg-white/20 border border-white/20 flex items-center justify-center text-white transition shadow-sm relative" title="Distributed Canvas List">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"></path></svg>
+                </button>
+            </div>
         </header>
 
         <!-- Main Content Area -->
@@ -44,12 +57,12 @@
                 <div>
                     <label class="block text-xs font-bold uppercase tracking-widest text-indigo-600 mb-2.5">Select Student Name</label>
                     
-                    <!-- Clean Dropdown -->
+                    <!-- Clean Dropdown (Name Only) -->
                     <div class="relative">
                         <select x-model="selectedStudentName" @change="selectStudent" class="w-full p-4 border border-slate-200 rounded-2xl bg-slate-50 text-slate-900 shadow-sm focus:ring-2 focus:ring-indigo-500 focus:bg-white focus:outline-none text-base font-medium appearance-none transition">
                             <option value="">-- Choose from <span x-text="students.length"></span> students --</option>
                             <template x-for="student in students" :key="student.name">
-                                <option :value="student.name" x-text="student.name + ' (' + student.classVal + ')'"></option>
+                                <option :value="student.name" x-text="student.name"></option>
                             </template>
                         </select>
                         <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4 text-indigo-600">
@@ -66,13 +79,17 @@
                     </div>
                     <div class="grid grid-cols-2 gap-3 text-center">
                         <div class="bg-white p-3 rounded-xl border border-slate-200 shadow-sm">
-                            <p class="text-xs text-slate-500 font-medium">Total Distributed</p>
+                            <p class="text-xs text-slate-500 font-medium">Total Canvas Distributed</p>
                             <p class="text-lg font-black text-emerald-600 mt-1" x-text="totalDistributedCanvas">0</p>
                         </div>
                         <div class="bg-white p-3 rounded-xl border border-slate-200 shadow-sm">
-                            <p class="text-xs text-slate-500 font-medium">Total Needed</p>
+                            <p class="text-xs text-slate-500 font-medium">Total Canvas Needed</p>
                             <p class="text-lg font-black text-indigo-600 mt-1" x-text="totalNeededCanvas">0</p>
                         </div>
+                    </div>
+                    <div class="bg-white p-3 rounded-xl border border-slate-200 shadow-sm text-center">
+                        <p class="text-xs text-slate-500 font-medium">Total Number of Students Paid</p>
+                        <p class="text-lg font-black text-blue-600 mt-1" x-text="totalStudentsPaid">0</p>
                     </div>
                 </div>
 
@@ -115,7 +132,7 @@
                 <!-- ALREADY DISTRIBUTED WARNING BANNER -->
                 <div x-show="studentHistory.length > 0" class="bg-amber-50 border border-amber-200 rounded-2xl p-3.5 space-y-1.5 shadow-sm">
                     <div class="flex items-center space-x-2 text-amber-700 text-xs font-bold uppercase tracking-wider">
-                        <span>⚠️️ Previously Distributed Items Locked</span>
+                        <span>⚠ Previously Distributed Items Locked</span>
                     </div>
                     <p class="text-[11px] text-amber-800">Items already given to this student have been automatically disabled.</p>
                 </div>
@@ -185,10 +202,54 @@
 
         </main>
 
-        <!-- Footer -->
+        <!-- FOOTER & MODAL -->
         <footer class="p-4 text-center text-xs text-slate-500 border-t border-slate-200 font-medium bg-slate-50">
             Materials Distribution Tracker &copy; 2026 | Made by <span class="font-bold text-indigo-600">Darpan Sukla</span>
         </footer>
+
+        <!-- POPUP MODAL FOR LISTS (Fully Scrollable) -->
+        <div x-show="modalOpen" class="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 backdrop-blur-sm p-4" x-cloak>
+            <div class="bg-white w-full max-w-sm rounded-3xl shadow-2xl overflow-hidden flex flex-col h-[75vh]">
+                <!-- Modal Header -->
+                <div class="bg-indigo-600 text-white p-4 flex items-center justify-between flex-shrink-0">
+                    <h3 class="font-bold text-sm uppercase tracking-wider" x-text="modalType === 'pending' ? '⏳ Pending Canvas Needed List' : '✅ Distributed Canvas List'"></h3>
+                    <button @click="modalOpen = false" class="w-8 h-8 rounded-full bg-indigo-700 flex items-center justify-center text-white hover:bg-indigo-800 transition font-bold text-xs">✕</button>
+                </div>
+                <!-- Modal Body List with smooth touch scrolling enabled -->
+                <div class="p-4 overflow-y-auto flex-grow space-y-2 overscroll-contain">
+                    <template x-if="modalType === 'pending'">
+                        <div class="space-y-2 pb-4">
+                            <template x-for="item in pendingStudents" :key="item.name">
+                                <div class="flex items-center justify-between p-3 bg-slate-50 border border-slate-200 rounded-xl">
+                                    <span class="text-xs font-semibold text-slate-800" x-text="item.name"></span>
+                                    <span class="text-xs font-bold text-amber-600 bg-amber-50 px-2 py-1 rounded-lg border border-amber-200" x-text="item.pendingCount + ' canvas not distributed'"></span>
+                                </div>
+                            </template>
+                            <div x-show="pendingStudents.length === 0" class="text-center py-8 text-xs text-slate-500 font-medium">
+                                🎉 All paid students have received their canvases!
+                            </div>
+                        </div>
+                    </template>
+                    <template x-if="modalType === 'distributed'">
+                        <div class="space-y-2 pb-4">
+                            <template x-for="item in distributedStudents" :key="item.name">
+                                <div class="flex items-center justify-between p-3 bg-slate-50 border border-slate-200 rounded-xl">
+                                    <span class="text-xs font-semibold text-slate-800" x-text="item.name"></span>
+                                    <span class="text-xs font-bold text-emerald-600 bg-emerald-50 px-2 py-1 rounded-lg border border-emerald-200" x-text="item.distributedCount + ' canvas distributed'"></span>
+                                </div>
+                            </template>
+                            <div x-show="distributedStudents.length === 0" class="text-center py-8 text-xs text-slate-500 font-medium">
+                                No canvases distributed yet.
+                            </div>
+                        </div>
+                    </template>
+                </div>
+                <!-- Modal Footer -->
+                <div class="p-3 bg-slate-50 border-t border-slate-200 text-center flex-shrink-0">
+                    <button @click="modalOpen = false" class="w-full bg-slate-200 hover:bg-slate-300 text-slate-700 font-semibold py-2.5 rounded-xl text-xs transition">Close</button>
+                </div>
+            </div>
+        </div>
     </div>
 
     <!-- Application Script -->
@@ -209,6 +270,8 @@
                 canvas1: false,
                 canvas2: false,
                 submitting: false,
+                modalOpen: false,
+                modalType: 'pending',
                 scriptURL: 'https://script.google.com/macros/s/AKfycbynakTEK9vajsj-Yx6V9jTwRKWI70Whlfl_NmN4j6Fi_QHHOsjY4vI9phHzneDQ0JIN/exec',
 
                 init() {
@@ -230,12 +293,14 @@
                                         const match = rawPhoto.match(/\/file\/d\/([a-zA-Z0-9_-]+)/);
                                         if (match && match[1]) rawPhoto = `https://lh3.googleusercontent.com/d/${match[1]}=s220`;
                                     }
+                                    let feeVal = row['Material Fee'] ? row['Material Fee'].toString().trim() : '';
                                     return {
                                         name: row['Student Name'].trim(),
-                                        fee: row['Material Fee'] || '',
+                                        fee: feeVal,
                                         paymentMode: row['Payment Mode'] || '',
                                         photo: rawPhoto,
-                                        classVal: row['Class'] || ''
+                                        classVal: row['Class'] || '',
+                                        hasPaid: feeVal !== '' && feeVal !== '0' && feeVal.toLowerCase() !== 'unpaid' && feeVal.toLowerCase() !== 'pending'
                                     };
                                 });
                         }
@@ -258,9 +323,46 @@
                     return count;
                 },
 
+                get totalStudentsPaid() {
+                    return this.students.filter(s => s.hasPaid).length;
+                },
+
                 get totalNeededCanvas() {
-                    let totalPossible = this.students.length * 2;
+                    let totalPossible = this.totalStudentsPaid * 2;
                     return Math.max(0, totalPossible - this.totalDistributedCanvas);
+                },
+
+                get pendingStudents() {
+                    let list = [];
+                    this.students.filter(s => s.hasPaid).forEach(s => {
+                        let records = this.historyRecords.filter(h => h['Student Name'] && h['Student Name'].trim().toLowerCase() === s.name.toLowerCase());
+                        let hasC1 = records.some(h => h['Canvas 1'] && h['Canvas 1'].trim().toLowerCase() === 'yes');
+                        let hasC2 = records.some(h => h['Canvas 2'] && h['Canvas 2'].trim().toLowerCase() === 'yes');
+                        let pendingCount = (hasC1 ? 0 : 1) + (hasC2 ? 0 : 1);
+                        if (pendingCount > 0) {
+                            list.push({ name: s.name, pendingCount: pendingCount });
+                        }
+                    });
+                    return list;
+                },
+
+                get distributedStudents() {
+                    let list = [];
+                    this.students.forEach(s => {
+                        let records = this.historyRecords.filter(h => h['Student Name'] && h['Student Name'].trim().toLowerCase() === s.name.toLowerCase());
+                        let hasC1 = records.some(h => h['Canvas 1'] && h['Canvas 1'].trim().toLowerCase() === 'yes');
+                        let hasC2 = records.some(h => h['Canvas 2'] && h['Canvas 2'].trim().toLowerCase() === 'yes');
+                        let distributedCount = (hasC1 ? 1 : 0) + (hasC2 ? 1 : 0);
+                        if (distributedCount > 0) {
+                            list.push({ name: s.name, distributedCount: distributedCount });
+                        }
+                    });
+                    return list;
+                },
+
+                openModal(type) {
+                    this.modalType = type;
+                    this.modalOpen = true;
                 },
 
                 selectStudent() {
