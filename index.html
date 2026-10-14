@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Materials Distribution Tracker</title>
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -16,186 +16,179 @@
     <div class="max-w-md mx-auto min-h-screen bg-white shadow-2xl flex flex-col justify-between overflow-hidden border-x border-slate-200">
         
         <!-- Header -->
-        <header class="bg-gradient-to-r from-indigo-600 via-indigo-700 to-blue-600 text-white p-5 shadow-lg rounded-b-3xl relative flex items-center justify-between">
-            <div class="flex items-center space-x-3">
-                <button x-show="screen !== 'home'" @click="screen = 'home'" class="w-8 h-8 rounded-lg bg-white/10 hover:bg-white/20 flex items-center justify-center text-white transition" title="Back to Home">
+        <header class="bg-gradient-to-r from-indigo-600 via-indigo-700 to-blue-600 text-white p-4 shadow-lg rounded-b-3xl relative flex items-center justify-between flex-shrink-0">
+            <div class="flex items-center space-x-2.5 overflow-hidden">
+                <button x-show="screen !== 'home'" @click="screen = 'home'" class="w-8 h-8 rounded-lg bg-white/10 hover:bg-white/20 flex items-center justify-center text-white transition flex-shrink-0" title="Back to Home">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg>
                 </button>
-                <div>
-                    <h1 class="text-xl font-black tracking-tight">Materials Tracker</h1>
-                    <p class="text-xs text-indigo-100 mt-0.5 font-medium opacity-90" x-text="headerSubtitle"></p>
+                <div class="overflow-hidden">
+                    <h1 class="text-base font-black tracking-tight truncate">Materials Tracker</h1>
+                    <p class="text-[11px] text-indigo-100 font-medium opacity-90 truncate" x-text="headerSubtitle"></p>
                 </div>
             </div>
-            <div class="flex items-center space-x-2">
+            <div class="flex items-center space-x-2 flex-shrink-0">
                 <!-- Distributed Canvas List Icon Button -->
-                <button @click="openModal" class="w-10 h-10 rounded-xl bg-white/10 hover:bg-white/20 border border-white/20 flex items-center justify-center text-white transition shadow-sm relative" title="Distributed Canvas List">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"></path></svg>
+                <button @click="openModal" class="w-9 h-9 rounded-xl bg-white/10 hover:bg-white/20 border border-white/20 flex items-center justify-center text-white transition shadow-sm relative" title="Distributed Canvas List">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"></path></svg>
                 </button>
             </div>
         </header>
 
         <!-- Main Content Area -->
-        <main class="p-5 flex-grow flex flex-col justify-center">
+        <main class="p-4 flex-grow flex flex-col justify-start overflow-y-auto">
 
             <!-- LOADING SPINNER -->
-            <div x-show="loading" class="flex flex-col items-center justify-center py-12">
-                <div class="relative w-14 h-14">
+            <div x-show="loading" class="flex flex-col items-center justify-center py-16">
+                <div class="relative w-12 h-12">
                     <div class="absolute inset-0 rounded-full border-4 border-indigo-500/20"></div>
                     <div class="absolute inset-0 rounded-full border-4 border-indigo-500 border-t-transparent animate-spin"></div>
                 </div>
-                <p class="mt-4 text-sm font-semibold text-slate-500 tracking-wide" x-text="loadingText"></p>
+                <p class="mt-3 text-xs font-semibold text-slate-500 tracking-wide" x-text="loadingText"></p>
             </div>
 
             <!-- ERROR MESSAGE -->
-            <div x-show="errorMsg" class="bg-rose-50 border border-rose-200 text-rose-600 p-4 rounded-2xl text-center text-xs mb-4 shadow-sm">
+            <div x-show="errorMsg" class="bg-rose-50 border border-rose-200 text-rose-600 p-3 rounded-2xl text-center text-xs mb-4 shadow-sm">
                 <p class="font-bold mb-1">⚠️ Connection Notice</p>
                 <p x-text="errorMsg"></p>
             </div>
 
             <!-- HOME SCREEN: 2 ICON CARDS -->
-            <div x-show="!loading && screen === 'home'" class="space-y-4 py-4">
-                <div class="text-center mb-6">
-                    <h2 class="text-lg font-bold text-slate-900">Main Menu</h2>
-                    <p class="text-xs text-slate-500">Select a section below to get started</p>
+            <div x-show="!loading && screen === 'home'" class="space-y-3 py-2">
+                <div class="text-center mb-4">
+                    <h2 class="text-base font-bold text-slate-900">Main Menu</h2>
+                    <p class="text-[11px] text-slate-500">Select a section below to continue</p>
                 </div>
 
                 <!-- Card 1: Dashboard & Status Section -->
-                <button @click="screen = 'dashboard'" class="w-full text-left bg-gradient-to-br from-indigo-50 to-blue-50 border border-indigo-200/80 hover:border-indigo-400 p-5 rounded-3xl shadow-sm transition-all group flex items-center space-x-4">
-                    <div class="w-14 h-14 rounded-2xl bg-indigo-600 text-white flex items-center justify-center text-2xl shadow-md group-hover:scale-105 transition-transform flex-shrink-0">
+                <button @click="screen = 'dashboard'" class="w-full text-left bg-gradient-to-br from-indigo-50 to-blue-50 border border-indigo-200/80 hover:border-indigo-400 p-4 rounded-2xl shadow-sm transition-all group flex items-center space-x-3.5">
+                    <div class="w-12 h-12 rounded-xl bg-indigo-600 text-white flex items-center justify-center text-xl shadow-md group-hover:scale-105 transition-transform flex-shrink-0">
                         📊
                     </div>
                     <div class="flex-grow">
-                        <h3 class="font-bold text-slate-900 text-base group-hover:text-indigo-600 transition-colors">Dashboard & Status</h3>
-                        <p class="text-xs text-slate-500 mt-0.5">View summary details, distributed canvas count, and payment stats.</p>
+                        <h3 class="font-bold text-slate-900 text-sm group-hover:text-indigo-600 transition-colors">Dashboard & Status</h3>
+                        <p class="text-[11px] text-slate-500 mt-0.5">View summary details, distributed count & payments.</p>
                     </div>
-                    <div class="text-indigo-400 group-hover:translate-x-1 transition-transform">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7"></path></svg>
+                    <div class="text-indigo-400 group-hover:translate-x-1 transition-transform flex-shrink-0">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7"></path></svg>
                     </div>
                 </button>
 
                 <!-- Card 2: Materials Distribution Section -->
-                <button @click="screen = 'distribution'" class="w-full text-left bg-gradient-to-br from-emerald-50 to-teal-50 border border-emerald-200/80 hover:border-emerald-400 p-5 rounded-3xl shadow-sm transition-all group flex items-center space-x-4">
-                    <div class="w-14 h-14 rounded-2xl bg-emerald-600 text-white flex items-center justify-center text-2xl shadow-md group-hover:scale-105 transition-transform flex-shrink-0">
+                <button @click="screen = 'distribution'" class="w-full text-left bg-gradient-to-br from-emerald-50 to-teal-50 border border-emerald-200/80 hover:border-emerald-400 p-4 rounded-2xl shadow-sm transition-all group flex items-center space-x-3.5">
+                    <div class="w-12 h-12 rounded-xl bg-emerald-600 text-white flex items-center justify-center text-xl shadow-md group-hover:scale-105 transition-transform flex-shrink-0">
                         📦
                     </div>
                     <div class="flex-grow">
-                        <h3 class="font-bold text-slate-900 text-base group-hover:text-emerald-600 transition-colors">Materials Distribution</h3>
-                        <p class="text-xs text-slate-500 mt-0.5">Tabular student checklist with photos for quick distribution.</p>
+                        <h3 class="font-bold text-slate-900 text-sm group-hover:text-emerald-600 transition-colors">Materials Distribution</h3>
+                        <p class="text-[11px] text-slate-500 mt-0.5">Student list with photos & checkboxes for quick entry.</p>
                     </div>
-                    <div class="text-emerald-400 group-hover:translate-x-1 transition-transform">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7"></path></svg>
+                    <div class="text-emerald-400 group-hover:translate-x-1 transition-transform flex-shrink-0">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7"></path></svg>
                     </div>
                 </button>
             </div>
 
             <!-- DASHBOARD SCREEN -->
-            <div x-show="!loading && screen === 'dashboard'" class="space-y-5">
+            <div x-show="!loading && screen === 'dashboard'" class="space-y-4 py-2">
                 <div class="bg-slate-50 border border-slate-200 rounded-2xl p-4 space-y-3 shadow-sm">
                     <div class="flex items-center justify-between border-b border-slate-200 pb-2">
                         <span class="text-xs font-bold uppercase tracking-wider text-indigo-600">📊 Status Section</span>
                         <span class="text-[10px] bg-indigo-100 text-indigo-700 px-2 py-0.5 rounded-full font-semibold">Live</span>
                     </div>
-                    <div class="grid grid-cols-2 gap-3 text-center">
+                    <div class="grid grid-cols-2 gap-2.5 text-center">
                         <div class="bg-white p-3 rounded-xl border border-slate-200 shadow-sm">
-                            <p class="text-xs text-slate-500 font-medium">Total Canvas Distributed</p>
-                            <p class="text-lg font-black text-emerald-600 mt-1" x-text="totalDistributedCanvas">0</p>
+                            <p class="text-[11px] text-slate-500 font-medium">Canvas Distributed</p>
+                            <p class="text-base font-black text-emerald-600 mt-1" x-text="totalDistributedCanvas">0</p>
                         </div>
                         <div class="bg-white p-3 rounded-xl border border-slate-200 shadow-sm">
-                            <p class="text-xs text-slate-500 font-medium">Total Canvas Needed</p>
-                            <p class="text-lg font-black text-indigo-600 mt-1" x-text="totalNeededCanvas">0</p>
+                            <p class="text-[11px] text-slate-500 font-medium">Canvas Needed</p>
+                            <p class="text-base font-black text-indigo-600 mt-1" x-text="totalNeededCanvas">0</p>
                         </div>
                     </div>
                     <div class="bg-white p-3 rounded-xl border border-slate-200 shadow-sm text-center">
-                        <p class="text-xs text-slate-500 font-medium">Total Number of Students Paid</p>
-                        <p class="text-lg font-black text-blue-600 mt-1" x-text="totalStudentsPaid">0</p>
+                        <p class="text-[11px] text-slate-500 font-medium">Total Students Paid</p>
+                        <p class="text-base font-black text-blue-600 mt-1" x-text="totalStudentsPaid">0</p>
                     </div>
                 </div>
 
-                <button @click="screen = 'home'" class="w-full bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold py-3 px-4 rounded-2xl border border-slate-200 transition text-sm">
+                <button @click="screen = 'home'" class="w-full bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold py-3 px-4 rounded-2xl border border-slate-200 transition text-xs">
                     Back to Menu
                 </button>
             </div>
 
-            <!-- MATERIALS DISTRIBUTION SCREEN (TABULAR WITH PHOTOS & CHECKBOXES) -->
-            <div x-show="!loading && screen === 'distribution'" class="space-y-4">
-                <div class="flex items-center justify-between">
-                    <label class="block text-xs font-bold uppercase tracking-widest text-indigo-600">Student Checklist</label>
-                    <input type="text" x-model="searchQuery" placeholder="Search student..." class="px-3 py-1.5 text-xs bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-1 focus:ring-indigo-500 w-36">
+            <!-- MATERIALS DISTRIBUTION SCREEN (MOBILE OPTIMIZED CARD/LIST VIEW) -->
+            <div x-show="!loading && screen === 'distribution'" class="space-y-3 pb-4">
+                <div class="flex items-center justify-between gap-2">
+                    <span class="text-[11px] font-bold uppercase tracking-wider text-indigo-600">Student Checklist</span>
+                    <input type="text" x-model="searchQuery" placeholder="Search name..." class="px-3 py-1.5 text-xs bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-1 focus:ring-indigo-500 w-32">
                 </div>
 
-                <!-- Tabular List with Photos -->
-                <div class="border border-slate-200 rounded-2xl overflow-hidden shadow-sm bg-white max-h-[60vh] overflow-y-auto">
-                    <table class="w-full text-left border-collapse">
-                        <thead class="bg-slate-50 text-[11px] font-bold text-slate-600 uppercase tracking-wider sticky top-0 border-b border-slate-200">
-                            <tr>
-                                <th class="p-3">Student</th>
-                                <th class="p-3 text-center">C1</th>
-                                <th class="p-3 text-center">C2</th>
-                                <th class="p-3 text-center">Action</th>
-                            </tr>
-                        </thead>
-                        <tbody class="divide-y divide-slate-100 text-xs">
-                            <template x-for="student in filteredStudents" :key="student.name">
-                                <tr class="hover:bg-slate-50/80 transition">
-                                    <td class="p-3">
-                                        <div class="flex items-center space-x-3">
-                                            <img :src="student.photo || 'https://via.placeholder.com/40?text=Photo'" 
-                                                 @error="$event.target.src='https://via.placeholder.com/40?text=Error'"
-                                                 alt="Photo" 
-                                                 class="w-10 h-10 rounded-xl object-cover border border-slate-200 shadow-sm flex-shrink-0 bg-slate-100">
-                                            <div class="overflow-hidden">
-                                                <div class="font-bold text-slate-800 truncate" x-text="student.name"></div>
-                                                <div class="text-[10px] text-slate-500" x-text="'Class: ' + student.classVal"></div>
-                                            </div>
-                                        </div>
-                                    </td>
-                                    <!-- Canvas 1 Checkbox -->
-                                    <td class="p-3 text-center align-middle">
-                                        <input type="checkbox" 
-                                               x-model="distributionState[student.name].canvas1" 
-                                               :disabled="student.alreadyC1"
-                                               class="w-4 h-4 rounded text-indigo-600 focus:ring-indigo-500 border-slate-300 disabled:opacity-40 cursor-pointer">
-                                        <span x-show="student.alreadyC1" class="block text-[9px] text-emerald-600 font-bold">Done</span>
-                                    </td>
-                                    <!-- Canvas 2 Checkbox -->
-                                    <td class="p-3 text-center align-middle">
-                                        <input type="checkbox" 
-                                               x-model="distributionState[student.name].canvas2" 
-                                               :disabled="student.alreadyC2"
-                                               class="w-4 h-4 rounded text-indigo-600 focus:ring-indigo-500 border-slate-300 disabled:opacity-40 cursor-pointer">
-                                        <span x-show="student.alreadyC2" class="block text-[9px] text-emerald-600 font-bold">Done</span>
-                                    </td>
-                                    <!-- Submit Row Action -->
-                                    <td class="p-3 text-center align-middle">
-                                        <button @click="submitStudentData(student)" 
-                                                :disabled="submitting || (student.alreadyC1 && student.alreadyC2)"
-                                                class="px-3 py-1.5 bg-indigo-600 hover:bg-indigo-700 disabled:bg-slate-200 disabled:text-slate-400 text-white font-bold rounded-xl transition text-[11px] shadow-sm">
-                                            Save
-                                        </button>
-                                    </td>
-                                </tr>
-                            </template>
-                        </tbody>
-                    </table>
+                <!-- Mobile-Friendly Stacked Student Cards -->
+                <div class="space-y-2.5 max-h-[55vh] overflow-y-auto pr-1">
+                    <template x-for="student in filteredStudents" :key="student.name">
+                        <div class="bg-white border border-slate-200 rounded-2xl p-3 shadow-sm flex items-center justify-between gap-2">
+                            <!-- Photo & Details -->
+                            <div class="flex items-center space-x-2.5 overflow-hidden flex-grow">
+                                <img :src="student.photo || 'https://via.placeholder.com/40?text=Photo'" 
+                                     @error="$event.target.src='https://via.placeholder.com/40?text=Error'"
+                                     alt="Photo" 
+                                     class="w-10 h-10 rounded-xl object-cover border border-slate-200 shadow-sm flex-shrink-0 bg-slate-100">
+                                <div class="overflow-hidden">
+                                    <h4 class="font-bold text-slate-800 text-xs truncate" x-text="student.name"></h4>
+                                    <p class="text-[10px] text-slate-500 truncate" x-text="'Class: ' + student.classVal"></p>
+                                </div>
+                            </div>
+
+                            <!-- Checkboxes & Save Action -->
+                            <div class="flex items-center space-x-2 flex-shrink-0">
+                                <!-- C1 Checkbox -->
+                                <div class="text-center">
+                                    <span class="block text-[9px] text-slate-400 font-bold mb-0.5">C1</span>
+                                    <input type="checkbox" 
+                                           x-model="distributionState[student.name].canvas1" 
+                                           :disabled="student.alreadyC1"
+                                           class="w-4 h-4 rounded text-indigo-600 focus:ring-indigo-500 border-slate-300 disabled:opacity-40 cursor-pointer">
+                                    <span x-show="student.alreadyC1" class="block text-[8px] text-emerald-600 font-bold">Done</span>
+                                </div>
+
+                                <!-- C2 Checkbox -->
+                                <div class="text-center">
+                                    <span class="block text-[9px] text-slate-400 font-bold mb-0.5">C2</span>
+                                    <input type="checkbox" 
+                                           x-model="distributionState[student.name].canvas2" 
+                                           :disabled="student.alreadyC2"
+                                           class="w-4 h-4 rounded text-indigo-600 focus:ring-indigo-500 border-slate-300 disabled:opacity-40 cursor-pointer">
+                                    <span x-show="student.alreadyC2" class="block text-[8px] text-emerald-600 font-bold">Done</span>
+                                </div>
+
+                                <!-- Save Button -->
+                                <button @click="submitStudentData(student)" 
+                                        :disabled="submitting || (student.alreadyC1 && student.alreadyC2)"
+                                        class="px-2.5 py-1.5 bg-indigo-600 hover:bg-indigo-700 disabled:bg-slate-100 disabled:text-slate-400 text-white font-bold rounded-xl transition text-[10px] shadow-sm ml-1">
+                                    Save
+                                </button>
+                            </div>
+                        </div>
+                    </template>
                 </div>
 
-                <button @click="screen = 'home'" class="w-full bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold py-3 px-4 rounded-2xl border border-slate-200 transition text-sm">
+                <button @click="screen = 'home'" class="w-full bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold py-2.5 px-4 rounded-2xl border border-slate-200 transition text-xs mt-2">
                     Back to Menu
                 </button>
             </div>
 
             <!-- SUCCESS SCREEN -->
-            <div x-show="!loading && screen === 'success'" class="text-center py-12 space-y-4">
-                <div class="w-20 h-20 bg-emerald-100 border border-emerald-200 text-emerald-600 rounded-3xl flex items-center justify-center mx-auto text-4xl shadow-inner font-bold">✓</div>
+            <div x-show="!loading && screen === 'success'" class="text-center py-10 space-y-3">
+                <div class="w-16 h-16 bg-emerald-100 border border-emerald-200 text-emerald-600 rounded-3xl flex items-center justify-center mx-auto text-3xl shadow-inner font-bold">✓</div>
                 <div>
-                    <h2 class="text-xl font-bold text-slate-900">Successfully Submitted!</h2>
-                    <p class="text-xs text-slate-500 mt-1">Record successfully saved to Google Sheet.</p>
+                    <h2 class="text-base font-bold text-slate-900">Successfully Submitted!</h2>
+                    <p class="text-[11px] text-slate-500 mt-0.5">Record successfully saved to Google Sheet.</p>
                 </div>
-                <div class="pt-6 space-y-2">
-                    <button @click="screen = 'distribution'" class="w-full bg-gradient-to-r from-indigo-600 to-blue-600 text-white font-bold py-3.5 px-4 rounded-2xl shadow-lg transition-all text-sm">
-                        Back to Distribution Table
+                <div class="pt-4 space-y-2">
+                    <button @click="screen = 'distribution'" class="w-full bg-gradient-to-r from-indigo-600 to-blue-600 text-white font-bold py-3 px-4 rounded-2xl shadow-lg transition-all text-xs">
+                        Back to Distribution List
                     </button>
-                    <button @click="screen = 'home'" class="w-full bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold py-3 px-4 rounded-2xl border border-slate-200 transition text-sm">
+                    <button @click="screen = 'home'" class="w-full bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold py-2.5 px-4 rounded-2xl border border-slate-200 transition text-xs">
                         Main Menu
                     </button>
                 </div>
@@ -204,35 +197,35 @@
         </main>
 
         <!-- FOOTER & MODAL -->
-        <footer class="p-4 text-center text-xs text-slate-500 border-t border-slate-200 font-medium bg-slate-50">
+        <footer class="p-3 text-center text-[11px] text-slate-500 border-t border-slate-200 font-medium bg-slate-50 flex-shrink-0">
             Materials Distribution Tracker &copy; 2026 | Made by <span class="font-bold text-indigo-600">Darpan Sukla</span>[cite: 1]
         </footer>
 
         <!-- POPUP MODAL FOR DISTRIBUTED LIST -->
         <div x-show="modalOpen" class="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 backdrop-blur-sm p-4" x-cloak>
-            <div class="bg-white w-full max-w-sm rounded-3xl shadow-2xl overflow-hidden flex flex-col h-[75vh]">
+            <div class="bg-white w-full max-w-sm rounded-3xl shadow-2xl overflow-hidden flex flex-col h-[70vh]">
                 <!-- Modal Header -->
-                <div class="bg-indigo-600 text-white p-4 flex items-center justify-between flex-shrink-0">
-                    <h3 class="font-bold text-sm uppercase tracking-wider">✅ Distributed Canvas List</h3>
-                    <button @click="modalOpen = false" class="w-8 h-8 rounded-full bg-indigo-700 flex items-center justify-center text-white hover:bg-indigo-800 transition font-bold text-xs">✕</button>
+                <div class="bg-indigo-600 text-white p-3.5 flex items-center justify-between flex-shrink-0">
+                    <h3 class="font-bold text-xs uppercase tracking-wider">✅ Distributed Canvas List</h3>
+                    <button @click="modalOpen = false" class="w-7 h-7 rounded-full bg-indigo-700 flex items-center justify-center text-white hover:bg-indigo-800 transition font-bold text-xs">✕</button>
                 </div>
                 <!-- Modal Body List -->
-                <div class="p-4 overflow-y-auto flex-grow space-y-2 overscroll-contain">
-                    <div class="space-y-2 pb-4">
+                <div class="p-3.5 overflow-y-auto flex-grow space-y-2 overscroll-contain">
+                    <div class="space-y-2 pb-2">
                         <template x-for="item in distributedStudents" :key="item.name">
-                            <div class="flex items-center justify-between p-3 bg-slate-50 border border-slate-200 rounded-xl">
+                            <div class="flex items-center justify-between p-2.5 bg-slate-50 border border-slate-200 rounded-xl">
                                 <span class="text-xs font-semibold text-slate-800" x-text="item.name"></span>
-                                <span class="text-xs font-bold text-emerald-600 bg-emerald-50 px-2 py-1 rounded-lg border border-emerald-200" x-text="item.distributedCount + ' canvas distributed'"></span>
+                                <span class="text-[11px] font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-lg border border-emerald-200" x-text="item.distributedCount + ' distributed'"></span>
                             </div>
                         </template>
-                        <div x-show="distributedStudents.length === 0" class="text-center py-8 text-xs text-slate-500 font-medium">
+                        <div x-show="distributedStudents.length === 0" class="text-center py-6 text-xs text-slate-500 font-medium">
                             No canvases distributed yet.
                         </div>
                     </div>
                 </div>
                 <!-- Modal Footer -->
                 <div class="p-3 bg-slate-50 border-t border-slate-200 text-center flex-shrink-0">
-                    <button @click="modalOpen = false" class="w-full bg-slate-200 hover:bg-slate-300 text-slate-700 font-semibold py-2.5 rounded-xl text-xs transition">Close</button>
+                    <button @click="modalOpen = false" class="w-full bg-slate-200 hover:bg-slate-300 text-slate-700 font-semibold py-2 rounded-xl text-xs transition">Close</button>
                 </div>
             </div>
         </div>
@@ -243,7 +236,7 @@
         function trackerApp() {
             return {
                 loading: true,
-                loadingText: 'Loading database & status...',
+                loadingText: 'Loading database...',
                 errorMsg: '',
                 screen: 'home', 
                 students: [],
