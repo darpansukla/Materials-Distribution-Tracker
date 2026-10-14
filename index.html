@@ -17,9 +17,14 @@
         
         <!-- Header -->
         <header class="bg-gradient-to-r from-indigo-600 via-indigo-700 to-blue-600 text-white p-5 shadow-lg rounded-b-3xl relative flex items-center justify-between">
-            <div>
-                <h1 class="text-xl font-black tracking-tight">Materials Tracker</h1>
-                <p class="text-xs text-indigo-100 mt-0.5 font-medium opacity-90">Distribution & Status System</p>
+            <div class="flex items-center space-x-3">
+                <button x-show="screen !== 'home'" @click="screen = 'home'" class="w-8 h-8 rounded-lg bg-white/10 hover:bg-white/20 flex items-center justify-center text-white transition" title="Back to Home">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg>
+                </button>
+                <div>
+                    <h1 class="text-xl font-black tracking-tight">Materials Tracker</h1>
+                    <p class="text-xs text-indigo-100 mt-0.5 font-medium opacity-90" x-text="headerSubtitle"></p>
+                </div>
             </div>
             <div class="flex items-center space-x-2">
                 <!-- Distributed Canvas List Icon Button -->
@@ -47,26 +52,44 @@
                 <p x-text="errorMsg"></p>
             </div>
 
-            <!-- SCREEN 1: SELECT STUDENT & STATUS SECTION -->
-            <div x-show="!loading && screen === 1" class="space-y-5">
-                <div>
-                    <label class="block text-xs font-bold uppercase tracking-widest text-indigo-600 mb-2.5">Select Student Name</label>
-                    
-                    <!-- Clean Dropdown (Name Only) -->
-                    <div class="relative">
-                        <select x-model="selectedStudentName" @change="selectStudent" class="w-full p-4 border border-slate-200 rounded-2xl bg-slate-50 text-slate-900 shadow-sm focus:ring-2 focus:ring-indigo-500 focus:bg-white focus:outline-none text-base font-medium appearance-none transition">
-                            <option value="">-- Choose from <span x-text="students.length"></span> students --</option>
-                            <template x-for="student in students" :key="student.name">
-                                <option :value="student.name" x-text="student.name"></option>
-                            </template>
-                        </select>
-                        <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4 text-indigo-600">
-                            <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 9l-7 7-7-7"></path></svg>
-                        </div>
-                    </div>
+            <!-- HOME SCREEN: 2 ICON CARDS -->
+            <div x-show="!loading && screen === 'home'" class="space-y-4 py-4">
+                <div class="text-center mb-6">
+                    <h2 class="text-lg font-bold text-slate-900">Main Menu</h2>
+                    <p class="text-xs text-slate-500">Select a section below to get started</p>
                 </div>
 
-                <!-- Status Section Dashboard -->
+                <!-- Card 1: Dashboard & Status Section -->
+                <button @click="screen = 'dashboard'" class="w-full text-left bg-gradient-to-br from-indigo-50 to-blue-50 border border-indigo-200/80 hover:border-indigo-400 p-5 rounded-3xl shadow-sm transition-all group flex items-center space-x-4">
+                    <div class="w-14 h-14 rounded-2xl bg-indigo-600 text-white flex items-center justify-center text-2xl shadow-md group-hover:scale-105 transition-transform flex-shrink-0">
+                        📊
+                    </div>
+                    <div class="flex-grow">
+                        <h3 class="font-bold text-slate-900 text-base group-hover:text-indigo-600 transition-colors">Dashboard & Status</h3>
+                        <p class="text-xs text-slate-500 mt-0.5">View summary details, distributed canvas count, and payment stats.</p>
+                    </div>
+                    <div class="text-indigo-400 group-hover:translate-x-1 transition-transform">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7"></path></svg>
+                    </div>
+                </button>
+
+                <!-- Card 2: Materials Distribution Section -->
+                <button @click="screen = 'distribution'" class="w-full text-left bg-gradient-to-br from-emerald-50 to-teal-50 border border-emerald-200/80 hover:border-emerald-400 p-5 rounded-3xl shadow-sm transition-all group flex items-center space-x-4">
+                    <div class="w-14 h-14 rounded-2xl bg-emerald-600 text-white flex items-center justify-center text-2xl shadow-md group-hover:scale-105 transition-transform flex-shrink-0">
+                        📦
+                    </div>
+                    <div class="flex-grow">
+                        <h3 class="font-bold text-slate-900 text-base group-hover:text-emerald-600 transition-colors">Materials Distribution</h3>
+                        <p class="text-xs text-slate-500 mt-0.5">Tabular student checklist with photos for quick distribution.</p>
+                    </div>
+                    <div class="text-emerald-400 group-hover:translate-x-1 transition-transform">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7"></path></svg>
+                    </div>
+                </button>
+            </div>
+
+            <!-- DASHBOARD SCREEN -->
+            <div x-show="!loading && screen === 'dashboard'" class="space-y-5">
                 <div class="bg-slate-50 border border-slate-200 rounded-2xl p-4 space-y-3 shadow-sm">
                     <div class="flex items-center justify-between border-b border-slate-200 pb-2">
                         <span class="text-xs font-bold uppercase tracking-wider text-indigo-600">📊 Status Section</span>
@@ -88,109 +111,92 @@
                     </div>
                 </div>
 
-                <div class="bg-indigo-50 border border-indigo-100 rounded-2xl p-4 text-center text-xs text-indigo-900 leading-relaxed font-medium">
-                    ✨ Select a student from the dropdown above to manage material distribution.
-                </div>
+                <button @click="screen = 'home'" class="w-full bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold py-3 px-4 rounded-2xl border border-slate-200 transition text-sm">
+                    Back to Menu
+                </button>
             </div>
 
-            <!-- SCREEN 2: VERIFICATION & SMART LOCKED TOGGLES -->
-            <div x-show="!loading && screen === 2" class="space-y-5">
-                
-                <!-- Verification Badge Card -->
-                <div class="bg-gradient-to-br from-indigo-900 via-slate-900 to-indigo-950 text-white rounded-3xl p-5 shadow-xl relative overflow-hidden">
-                    <div class="absolute -right-10 -bottom-10 w-32 h-32 bg-indigo-500/10 rounded-full blur-2xl"></div>
-                    
-                    <div class="flex items-center space-x-4 relative z-10">
-                        <!-- Photo with Payment Verified Badge -->
-                        <div class="relative flex-shrink-0">
-                            <img :src="currentStudent.photo || 'https://via.placeholder.com/90?text=Photo'" 
-                                 @error="$event.target.src='https://via.placeholder.com/90?text=Error'"
-                                 alt="Student Photo" 
-                                 class="w-20 h-20 rounded-2xl object-cover border-2 border-emerald-400 shadow-lg bg-slate-800">
-                            <span class="absolute -bottom-2.5 -right-2 bg-emerald-500 text-slate-950 text-[9px] font-black px-2 py-0.5 rounded-full shadow-md border border-slate-900 tracking-wider uppercase">
-                                Verified
-                            </span>
-                        </div>
-
-                        <!-- Details -->
-                        <div class="overflow-hidden flex-grow">
-                            <span class="inline-block bg-emerald-500/20 text-emerald-300 text-[10px] px-2.5 py-0.5 rounded-md font-bold mb-1 uppercase tracking-wider border border-emerald-500/30">
-                                Payment Done ✓
-                            </span>
-                            <h2 class="text-base font-bold text-white truncate" x-text="currentStudent.name"></h2>
-                            <p class="text-xs text-slate-300 mt-0.5">Class: <span class="font-semibold text-white" x-text="currentStudent.classVal"></span></p>
-                            <p class="text-xs text-slate-300">Fee: ₹<span class="font-semibold text-emerald-400" x-text="currentStudent.fee"></span> <span class="text-[11px] text-slate-400" x-text="'(' + currentStudent.paymentMode + ')'"></span></p>
-                        </div>
-                    </div>
+            <!-- MATERIALS DISTRIBUTION SCREEN (TABULAR WITH PHOTOS & CHECKBOXES) -->
+            <div x-show="!loading && screen === 'distribution'" class="space-y-4">
+                <div class="flex items-center justify-between">
+                    <label class="block text-xs font-bold uppercase tracking-widest text-indigo-600">Student Checklist</label>
+                    <input type="text" x-model="searchQuery" placeholder="Search student..." class="px-3 py-1.5 text-xs bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-1 focus:ring-indigo-500 w-36">
                 </div>
 
-                <!-- ALREADY DISTRIBUTED WARNING BANNER -->
-                <div x-show="studentHistory.length > 0" class="bg-amber-50 border border-amber-200 rounded-2xl p-3.5 space-y-1.5 shadow-sm">
-                    <div class="flex items-center space-x-2 text-amber-700 text-xs font-bold uppercase tracking-wider">
-                        <span>⚠ Previously Distributed Items Locked</span>
-                    </div>
-                    <p class="text-[11px] text-amber-800">Items already given to this student have been automatically disabled.</p>
+                <!-- Tabular List with Photos -->
+                <div class="border border-slate-200 rounded-2xl overflow-hidden shadow-sm bg-white max-h-[60vh] overflow-y-auto">
+                    <table class="w-full text-left border-collapse">
+                        <thead class="bg-slate-50 text-[11px] font-bold text-slate-600 uppercase tracking-wider sticky top-0 border-b border-slate-200">
+                            <tr>
+                                <th class="p-3">Student</th>
+                                <th class="p-3 text-center">C1</th>
+                                <th class="p-3 text-center">C2</th>
+                                <th class="p-3 text-center">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-slate-100 text-xs">
+                            <template x-for="student in filteredStudents" :key="student.name">
+                                <tr class="hover:bg-slate-50/80 transition">
+                                    <td class="p-3">
+                                        <div class="flex items-center space-x-3">
+                                            <img :src="student.photo || 'https://via.placeholder.com/40?text=Photo'" 
+                                                 @error="$event.target.src='https://via.placeholder.com/40?text=Error'"
+                                                 alt="Photo" 
+                                                 class="w-10 h-10 rounded-xl object-cover border border-slate-200 shadow-sm flex-shrink-0 bg-slate-100">
+                                            <div class="overflow-hidden">
+                                                <div class="font-bold text-slate-800 truncate" x-text="student.name"></div>
+                                                <div class="text-[10px] text-slate-500" x-text="'Class: ' + student.classVal"></div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <!-- Canvas 1 Checkbox -->
+                                    <td class="p-3 text-center align-middle">
+                                        <input type="checkbox" 
+                                               x-model="distributionState[student.name].canvas1" 
+                                               :disabled="student.alreadyC1"
+                                               class="w-4 h-4 rounded text-indigo-600 focus:ring-indigo-500 border-slate-300 disabled:opacity-40 cursor-pointer">
+                                        <span x-show="student.alreadyC1" class="block text-[9px] text-emerald-600 font-bold">Done</span>
+                                    </td>
+                                    <!-- Canvas 2 Checkbox -->
+                                    <td class="p-3 text-center align-middle">
+                                        <input type="checkbox" 
+                                               x-model="distributionState[student.name].canvas2" 
+                                               :disabled="student.alreadyC2"
+                                               class="w-4 h-4 rounded text-indigo-600 focus:ring-indigo-500 border-slate-300 disabled:opacity-40 cursor-pointer">
+                                        <span x-show="student.alreadyC2" class="block text-[9px] text-emerald-600 font-bold">Done</span>
+                                    </td>
+                                    <!-- Submit Row Action -->
+                                    <td class="p-3 text-center align-middle">
+                                        <button @click="submitStudentData(student)" 
+                                                :disabled="submitting || (student.alreadyC1 && student.alreadyC2)"
+                                                class="px-3 py-1.5 bg-indigo-600 hover:bg-indigo-700 disabled:bg-slate-200 disabled:text-slate-400 text-white font-bold rounded-xl transition text-[11px] shadow-sm">
+                                            Save
+                                        </button>
+                                    </td>
+                                </tr>
+                            </template>
+                        </tbody>
+                    </table>
                 </div>
 
-                <!-- High-Performance Smart Toggles -->
-                <div class="space-y-3">
-                    <label class="block text-xs font-bold uppercase tracking-widest text-indigo-600">Select Distribution Items</label>
-                    
-                    <!-- Toggle 1 (Canvas 1) -->
-                    <div @click="!alreadyHasCanvas1 && (canvas1 = !canvas1)" class="flex items-center justify-between p-3.5 border rounded-2xl shadow-sm transition-all select-none"
-                         :class="alreadyHasCanvas1 ? 'bg-slate-100 border-slate-200 opacity-60 cursor-not-allowed' : 'bg-slate-50 border-slate-200 cursor-pointer active:scale-[0.99] hover:border-indigo-400'">
-                        <div class="flex items-center space-x-3.5">
-                            <div class="w-9 h-9 rounded-xl bg-indigo-100 text-indigo-600 flex items-center justify-center font-bold text-sm border border-indigo-200">C1</div>
-                            <div>
-                                <span class="font-semibold text-slate-800 text-sm">Canvas 1</span>
-                                <span x-show="alreadyHasCanvas1" class="block text-[10px] text-amber-600 font-bold uppercase tracking-wider">Already Given ✓</span>
-                            </div>
-                        </div>
-                        <div class="w-14 h-8 flex items-center rounded-full p-1 transition-colors duration-300" :class="canvas1 ? 'bg-indigo-600' : 'bg-slate-300'">
-                            <div class="bg-white w-6 h-6 rounded-full shadow-md transform transition-transform duration-300" :class="canvas1 ? 'translate-x-6' : 'translate-x-0'"></div>
-                        </div>
-                    </div>
-
-                    <!-- Toggle 2 (Canvas 2) -->
-                    <div @click="!alreadyHasCanvas2 && (canvas2 = !canvas2)" class="flex items-center justify-between p-3.5 border rounded-2xl shadow-sm transition-all select-none"
-                         :class="alreadyHasCanvas2 ? 'bg-slate-100 border-slate-200 opacity-60 cursor-not-allowed' : 'bg-slate-50 border-slate-200 cursor-pointer active:scale-[0.99] hover:border-indigo-400'">
-                        <div class="flex items-center space-x-3.5">
-                            <div class="w-9 h-9 rounded-xl bg-blue-100 text-blue-600 flex items-center justify-center font-bold text-sm border border-blue-200">C2</div>
-                            <div>
-                                <span class="font-semibold text-slate-800 text-sm">Canvas 2</span>
-                                <span x-show="alreadyHasCanvas2" class="block text-[10px] text-amber-600 font-bold uppercase tracking-wider">Already Given ✓</span>
-                            </div>
-                        </div>
-                        <div class="w-14 h-8 flex items-center rounded-full p-1 transition-colors duration-300" :class="canvas2 ? 'bg-indigo-600' : 'bg-slate-300'">
-                            <div class="bg-white w-6 h-6 rounded-full shadow-md transform transition-transform duration-300" :class="canvas2 ? 'translate-x-6' : 'translate-x-0'"></div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Action Buttons -->
-                <div class="space-y-2.5 pt-1">
-                    <button @click="submitData" :disabled="submitting || (alreadyHasCanvas1 && alreadyHasCanvas2)" 
-                            class="w-full font-bold py-3.5 px-4 rounded-2xl shadow-lg transition-all flex items-center justify-center text-base"
-                            :class="(alreadyHasCanvas1 && alreadyHasCanvas2) ? 'bg-slate-200 text-slate-400 cursor-not-allowed shadow-none' : 'bg-gradient-to-r from-indigo-600 to-blue-600 hover:from-indigo-500 hover:to-blue-500 active:scale-[0.98] text-white shadow-indigo-600/20'">
-                        <span x-show="submitting" class="animate-spin rounded-full h-5 w-5 border-2 border-white border-t-transparent mr-2.5"></span>
-                        <span x-text="(alreadyHasCanvas1 && alreadyHasCanvas2) ? 'All Items Already Distributed' : (submitting ? 'Submitting Record...' : 'Submit Data')"></span>
-                    </button>
-                    <button @click="resetForm" class="w-full bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold py-3 px-4 rounded-2xl border border-slate-200 transition text-sm">
-                        Change Student
-                    </button>
-                </div>
+                <button @click="screen = 'home'" class="w-full bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold py-3 px-4 rounded-2xl border border-slate-200 transition text-sm">
+                    Back to Menu
+                </button>
             </div>
 
             <!-- SUCCESS SCREEN -->
-            <div x-show="!loading && screen === 3" class="text-center py-12 space-y-4">
+            <div x-show="!loading && screen === 'success'" class="text-center py-12 space-y-4">
                 <div class="w-20 h-20 bg-emerald-100 border border-emerald-200 text-emerald-600 rounded-3xl flex items-center justify-center mx-auto text-4xl shadow-inner font-bold">✓</div>
                 <div>
                     <h2 class="text-xl font-bold text-slate-900">Successfully Submitted!</h2>
-                    <p class="text-xs text-slate-500 mt-1">Record successfully saved to Google Sheet 1.</p>
+                    <p class="text-xs text-slate-500 mt-1">Record successfully saved to Google Sheet.</p>
                 </div>
-                <div class="pt-6">
-                    <button @click="resetForm" class="w-full bg-gradient-to-r from-indigo-600 to-blue-600 hover:from-indigo-500 hover:to-blue-500 active:scale-[0.98] text-white font-bold py-4 px-4 rounded-2xl shadow-lg shadow-indigo-600/20 transition-all text-base">
-                        Add Another Student Record
+                <div class="pt-6 space-y-2">
+                    <button @click="screen = 'distribution'" class="w-full bg-gradient-to-r from-indigo-600 to-blue-600 text-white font-bold py-3.5 px-4 rounded-2xl shadow-lg transition-all text-sm">
+                        Back to Distribution Table
+                    </button>
+                    <button @click="screen = 'home'" class="w-full bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold py-3 px-4 rounded-2xl border border-slate-200 transition text-sm">
+                        Main Menu
                     </button>
                 </div>
             </div>
@@ -210,7 +216,7 @@
                     <h3 class="font-bold text-sm uppercase tracking-wider">✅ Distributed Canvas List</h3>
                     <button @click="modalOpen = false" class="w-8 h-8 rounded-full bg-indigo-700 flex items-center justify-center text-white hover:bg-indigo-800 transition font-bold text-xs">✕</button>
                 </div>
-                <!-- Modal Body List with smooth touch scrolling enabled -->
+                <!-- Modal Body List -->
                 <div class="p-4 overflow-y-auto flex-grow space-y-2 overscroll-contain">
                     <div class="space-y-2 pb-4">
                         <template x-for="item in distributedStudents" :key="item.name">
@@ -239,16 +245,11 @@
                 loading: true,
                 loadingText: 'Loading database & status...',
                 errorMsg: '',
-                screen: 1, 
+                screen: 'home', 
                 students: [],
                 historyRecords: [],
-                studentHistory: [],
-                alreadyHasCanvas1: false,
-                alreadyHasCanvas2: false,
-                selectedStudentName: '',
-                currentStudent: {},
-                canvas1: false,
-                canvas2: false,
+                distributionState: {},
+                searchQuery: '',
                 submitting: false,
                 modalOpen: false,
                 scriptURL: 'https://script.google.com/macros/s/AKfycbynakTEK9vajsj-Yx6V9jTwRKWI70Whlfl_NmN4j6Fi_QHHOsjY4vI9phHzneDQ0JIN/exec',
@@ -287,10 +288,35 @@
                         if (historyData && historyData.length > 0) {
                             this.historyRecords = historyData.filter(row => row['Student Name'] && row['Student Name'].trim() !== '');
                         }
+
+                        // Initialize checkboxes state map
+                        this.students.forEach(s => {
+                            this.distributionState[s.name] = { canvas1: false, canvas2: false };
+                        });
                     }).catch(() => {
                         this.loading = false;
                         this.errorMsg = 'Failed to load feeds. Check Google Sheet publishing links.';
                     });
+                },
+
+                get headerSubtitle() {
+                    if (this.screen === 'home') return 'Distribution & Status System';
+                    if (this.screen === 'dashboard') return 'Summary & Status Section';
+                    if (this.screen === 'distribution') return 'Student Material Checklist';
+                    return 'System Status';
+                },
+
+                get filteredStudents() {
+                    return this.students.map(s => {
+                        const studentHistory = this.historyRecords.filter(h => 
+                            h['Student Name'] && h['Student Name'].trim().toLowerCase() === s.name.toLowerCase()
+                        );
+                        return {
+                            ...s,
+                            alreadyC1: studentHistory.some(h => h['Canvas 1'] && h['Canvas 1'].trim().toLowerCase() === 'yes'),
+                            alreadyC2: studentHistory.some(h => h['Canvas 2'] && h['Canvas 2'].trim().toLowerCase() === 'yes')
+                        };
+                    }).filter(s => s.name.toLowerCase().includes(this.searchQuery.toLowerCase()));
                 },
 
                 get totalDistributedCanvas() {
@@ -329,36 +355,21 @@
                     this.modalOpen = true;
                 },
 
-                selectStudent() {
-                    if (!this.selectedStudentName) return;
-                    this.currentStudent = this.students.find(s => s.name === this.selectedStudentName) || {};
-                    
-                    this.studentHistory = this.historyRecords.filter(h => 
-                        h['Student Name'] && h['Student Name'].trim().toLowerCase() === this.selectedStudentName.toLowerCase()
-                    );
-
-                    this.alreadyHasCanvas1 = this.studentHistory.some(h => h['Canvas 1'] && h['Canvas 1'].trim().toLowerCase() === 'yes');
-                    this.alreadyHasCanvas2 = this.studentHistory.some(h => h['Canvas 2'] && h['Canvas 2'].trim().toLowerCase() === 'yes');
-
-                    this.canvas1 = false;
-                    this.canvas2 = false;
-                    this.screen = 2;
-                },
-
-                submitData() {
-                    if (!this.canvas1 && !this.canvas2) {
-                        alert('Please select at least Canvas 1 or Canvas 2.');
+                submitStudentData(student) {
+                    const state = this.distributionState[student.name];
+                    if (!state || (!state.canvas1 && !state.canvas2)) {
+                        alert('Please check at least Canvas 1 or Canvas 2 for ' + student.name);
                         return;
                     }
 
                     this.submitting = true;
                     const payload = {
-                        studentName: this.currentStudent.name,
-                        materialFee: this.currentStudent.fee,
-                        paymentMode: this.currentStudent.paymentMode,
-                        classVal: this.currentStudent.classVal,
-                        canvas1: this.canvas1,
-                        canvas2: this.canvas2
+                        studentName: student.name,
+                        materialFee: student.fee,
+                        paymentMode: student.paymentMode,
+                        classVal: student.classVal,
+                        canvas1: state.canvas1,
+                        canvas2: state.canvas2
                     };
 
                     fetch(this.scriptURL, {
@@ -369,30 +380,21 @@
                     .then(() => {
                         this.submitting = false;
                         
-                        // INSTANTLY update local history cache so Status Section updates right away
+                        // Update local history cache
                         this.historyRecords.push({
-                            'Student Name': this.currentStudent.name,
-                            'Canvas 1': this.canvas1 ? 'Yes' : 'No',
-                            'Canvas 2': this.canvas2 ? 'Yes' : 'No'
+                            'Student Name': student.name,
+                            'Canvas 1': state.canvas1 ? 'Yes' : 'No',
+                            'Canvas 2': state.canvas2 ? 'Yes' : 'No'
                         });
 
-                        this.screen = 3;
+                        // Reset checkbox for this student
+                        this.distributionState[student.name] = { canvas1: false, canvas2: false };
+                        this.screen = 'success';
                     })
                     .catch(() => {
                         this.submitting = false;
                         alert('Network error during submission.');
                     });
-                },
-
-                resetForm() {
-                    this.selectedStudentName = '';
-                    this.currentStudent = {};
-                    this.studentHistory = [];
-                    this.alreadyHasCanvas1 = false;
-                    this.alreadyHasCanvas2 = false;
-                    this.canvas1 = false;
-                    this.canvas2 = false;
-                    this.screen = 1;
                 }
             }
         }
