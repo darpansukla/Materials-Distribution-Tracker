@@ -80,7 +80,7 @@
                     </div>
                     <div class="flex-grow">
                         <h3 class="font-bold text-slate-900 text-sm group-hover:text-emerald-600 transition-colors">Materials Distribution</h3>
-                        <p class="text-[11px] text-slate-500 mt-0.5">Student list with photos & distribution date logs.</p>
+                        <p class="text-[11px] text-slate-500 mt-0.5">Student list with photos & friendly date logs.</p>
                     </div>
                     <div class="text-emerald-400 group-hover:translate-x-1 transition-transform flex-shrink-0">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7"></path></svg>
@@ -127,7 +127,7 @@
                 <div class="space-y-2.5 max-h-[58vh] overflow-y-auto pr-1">
                     <template x-for="student in filteredStudents" :key="student.name">
                         <div class="bg-white border border-slate-200 rounded-2xl p-3 shadow-sm flex items-center justify-between gap-2">
-                            <!-- Photo & Details with Date -->
+                            <!-- Photo & Details with Friendly Date -->
                             <div class="flex items-center space-x-2.5 overflow-hidden flex-grow">
                                 <img :src="student.photo || 'https://via.placeholder.com/40?text=Photo'" 
                                      @error="$event.target.src='https://via.placeholder.com/40?text=Error'"
@@ -136,17 +136,17 @@
                                 <div class="overflow-hidden">
                                     <h4 class="font-bold text-slate-800 text-xs truncate" x-text="student.name"></h4>
                                     <p class="text-[10px] text-slate-500 truncate" x-text="'Class: ' + student.classVal"></p>
-                                    <p x-show="student.lastDate" class="text-[9px] text-indigo-600 font-semibold mt-0.5 truncate" x-text="'Date: ' + student.lastDate"></p>
+                                    <p x-show="student.lastDate" class="text-[9px] text-indigo-600 font-semibold mt-0.5 truncate" x-text="'Given: ' + student.lastDate"></p>
                                 </div>
                             </div>
 
                             <!-- Checkboxes & Save Action / Complete Badge -->
-                            <div class="flex items-center space-x-2 flex-shrink-0">
+                            <div class="flex items-center space-x-2 flex-shrink-0" x-data="studentRowState(student.name)">
                                 <!-- C1 Checkbox -->
                                 <div class="text-center">
                                     <span class="block text-[9px] text-slate-400 font-bold mb-0.5">C1</span>
                                     <input type="checkbox" 
-                                           x-model="distributionState[student.name].canvas1" 
+                                           x-model="rowCanvas1" 
                                            :disabled="student.alreadyC1"
                                            class="w-4 h-4 rounded text-indigo-600 focus:ring-indigo-500 border-slate-300 disabled:opacity-40 cursor-pointer">
                                     <span x-show="student.alreadyC1" class="block text-[8px] text-emerald-600 font-bold">Done</span>
@@ -156,7 +156,7 @@
                                 <div class="text-center">
                                     <span class="block text-[9px] text-slate-400 font-bold mb-0.5">C2</span>
                                     <input type="checkbox" 
-                                           x-model="distributionState[student.name].canvas2" 
+                                           x-model="rowCanvas2" 
                                            :disabled="student.alreadyC2"
                                            class="w-4 h-4 rounded text-indigo-600 focus:ring-indigo-500 border-slate-300 disabled:opacity-40 cursor-pointer">
                                     <span x-show="student.alreadyC2" class="block text-[8px] text-emerald-600 font-bold">Done</span>
@@ -164,10 +164,10 @@
 
                                 <!-- Save Button or Fully Distributed Badge -->
                                 <template x-if="!(student.alreadyC1 && student.alreadyC2)">
-                                    <button @click="submitStudentData(student)" 
-                                            :disabled="submitting"
+                                    <button @click="submitThisStudent(student, rowCanvas1, rowCanvas2)" 
+                                            :disabled="isSubmitting"
                                             class="px-2.5 py-1.5 bg-indigo-600 hover:bg-indigo-700 disabled:bg-slate-100 disabled:text-slate-400 text-white font-bold rounded-xl transition text-[10px] shadow-sm ml-1 flex items-center justify-center">
-                                        <span x-show="submitting && currentSavingStudent === student.name" class="animate-spin rounded-full h-3 w-3 border-2 border-white border-t-transparent mr-1"></span>
+                                        <span x-show="isSubmitting" class="animate-spin rounded-full h-3 w-3 border-2 border-white border-t-transparent mr-1"></span>
                                         <span>Save</span>
                                     </button>
                                 </template>
@@ -201,7 +201,7 @@
                     <h3 class="font-bold text-xs uppercase tracking-wider">✅ Distributed Canvas List</h3>
                     <button @click="modalOpen = false" class="w-7 h-7 rounded-full bg-indigo-700 flex items-center justify-center text-white hover:bg-indigo-800 transition font-bold text-xs">✕</button>
                 </div>
-                <!-- Modal Body List with Date -->
+                <!-- Modal Body List with Readable Date -->
                 <div class="p-3.5 overflow-y-auto flex-grow space-y-2 overscroll-contain">
                     <div class="space-y-2 pb-2">
                         <template x-for="item in distributedStudents" :key="item.name">
@@ -210,7 +210,7 @@
                                     <span class="text-xs font-semibold text-slate-800" x-text="item.name"></span>
                                     <span class="text-[10px] font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-lg border border-emerald-200" x-text="item.distributedCount + ' distributed'"></span>
                                 </div>
-                                <p x-show="item.timestamp" class="text-[9px] text-slate-500" x-text="'Distributed on: ' + item.timestamp"></p>
+                                <p x-show="item.timestamp" class="text-[9px] text-slate-500" x-text="'Date: ' + item.timestamp"></p>
                             </div>
                         </template>
                         <div x-show="distributedStudents.length === 0" class="text-center py-6 text-xs text-slate-500 font-medium">
@@ -228,6 +228,40 @@
 
     <!-- Application Script -->
     <script>
+        // Helper function for user-friendly date formatting
+        function formatFriendlyDate(dateInput) {
+            if (!dateInput) return '';
+            let d = new Date(dateInput);
+            if (isNaN(d.getTime())) return dateInput; // Return original string if unparseable
+            return d.toLocaleString('en-US', { 
+                month: 'short', 
+                day: 'numeric', 
+                year: 'numeric', 
+                hour: '2-digit', 
+                minute: '2-digit',
+                hour12: true 
+            });
+        }
+
+        // Alpine component for isolated per-row state
+        function studentRowState(studentName) {
+            return {
+                rowCanvas1: false,
+                rowCanvas2: false,
+                isSubmitting: false,
+                submitThisStudent(student, c1, c2) {
+                    if (!c1 && !c2) {
+                        alert('Please check at least Canvas 1 or Canvas 2 for ' + student.name);
+                        return;
+                    }
+                    this.isSubmitting = true;
+                    window.dispatchEvent(new CustomEvent('save-student-record', { 
+                        detail: { student: student, c1: c1, c2: c2, rowContext: this } 
+                    }));
+                }
+            }
+        }
+
         function trackerApp() {
             return {
                 loading: true,
@@ -236,10 +270,7 @@
                 screen: 'home', 
                 students: [],
                 historyRecords: [],
-                distributionState: {},
                 searchQuery: '',
-                submitting: false,
-                currentSavingStudent: '',
                 modalOpen: false,
                 scriptURL: 'https://script.google.com/macros/s/AKfycbynakTEK9vajsj-Yx6V9jTwRKWI70Whlfl_NmN4j6Fi_QHHOsjY4vI9phHzneDQ0JIN/exec',
 
@@ -277,14 +308,49 @@
                         if (historyData && historyData.length > 0) {
                             this.historyRecords = historyData.filter(row => row['Student Name'] && row['Student Name'].trim() !== '');
                         }
-
-                        // Initialize checkboxes state map
-                        this.students.forEach(s => {
-                            this.distributionState[s.name] = { canvas1: false, canvas2: false };
-                        });
                     }).catch(() => {
                         this.loading = false;
                         this.errorMsg = 'Failed to load feeds. Check Google Sheet publishing links.';
+                    });
+
+                    // Global listener to handle individual row saves without cross-talk
+                    window.addEventListener('save-student-record', (e) => {
+                        const { student, c1, c2, rowContext } = e.detail;
+                        const friendlyNow = formatFriendlyDate(new Date());
+
+                        const payload = {
+                            studentName: student.name,
+                            materialFee: student.fee,
+                            paymentMode: student.paymentMode,
+                            classVal: student.classVal,
+                            canvas1: c1,
+                            canvas2: c2
+                        };
+
+                        fetch(this.scriptURL, {
+                            method: 'POST',
+                            body: JSON.stringify(payload)
+                        })
+                        .then(res => res.json())
+                        .then(() => {
+                            rowContext.isSubmitting = false;
+                            
+                            // Push to live history cache with friendly timestamp
+                            this.historyRecords.push({
+                                'Timestamp': friendlyNow,
+                                'Student Name': student.name,
+                                'Canvas 1': c1 ? 'Yes' : 'No',
+                                'Canvas 2': c2 ? 'Yes' : 'No'
+                            });
+
+                            // Clear only this specific row's checkboxes
+                            rowContext.rowCanvas1 = false;
+                            rowContext.rowCanvas2 = false;
+                        })
+                        .catch(() => {
+                            rowContext.isSubmitting = false;
+                            alert('Network error during submission.');
+                        });
                     });
                 },
 
@@ -305,7 +371,7 @@
                             ...s,
                             alreadyC1: studentHistory.some(h => h['Canvas 1'] && h['Canvas 1'].trim().toLowerCase() === 'yes'),
                             alreadyC2: studentHistory.some(h => h['Canvas 2'] && h['Canvas 2'].trim().toLowerCase() === 'yes'),
-                            lastDate: latestRecord ? (latestRecord['Timestamp'] || '') : ''
+                            lastDate: latestRecord ? formatFriendlyDate(latestRecord['Timestamp']) : ''
                         };
                     }).filter(s => s.name.toLowerCase().includes(this.searchQuery.toLowerCase()));
                 },
@@ -340,7 +406,7 @@
                             list.push({ 
                                 name: s.name, 
                                 distributedCount: distributedCount,
-                                timestamp: latestRec ? (latestRec['Timestamp'] || '') : ''
+                                timestamp: latestRec ? formatFriendlyDate(latestRec['Timestamp']) : ''
                             });
                         }
                     });
@@ -349,53 +415,6 @@
 
                 openModal() {
                     this.modalOpen = true;
-                },
-
-                submitStudentData(student) {
-                    const state = this.distributionState[student.name];
-                    if (!state || (!state.canvas1 && !state.canvas2)) {
-                        alert('Please check at least Canvas 1 or Canvas 2 for ' + student.name);
-                        return;
-                    }
-
-                    this.submitting = true;
-                    this.currentSavingStudent = student.name;
-
-                    const nowStr = new Date().toLocaleString();
-                    const payload = {
-                        studentName: student.name,
-                        materialFee: student.fee,
-                        paymentMode: student.paymentMode,
-                        classVal: student.classVal,
-                        canvas1: state.canvas1,
-                        canvas2: state.canvas2
-                    };
-
-                    fetch(this.scriptURL, {
-                        method: 'POST',
-                        body: JSON.stringify(payload)
-                    })
-                    .then(res => res.json())
-                    .then(() => {
-                        this.submitting = false;
-                        this.currentSavingStudent = '';
-                        
-                        // Push to live history cache with current timestamp
-                        this.historyRecords.push({
-                            'Timestamp': nowStr,
-                            'Student Name': student.name,
-                            'Canvas 1': state.canvas1 ? 'Yes' : 'No',
-                            'Canvas 2': state.canvas2 ? 'Yes' : 'No'
-                        });
-
-                        // Reset this student's local checkboxes
-                        this.distributionState[student.name] = { canvas1: false, canvas2: false };
-                    })
-                    .catch(() => {
-                        this.submitting = false;
-                        this.currentSavingStudent = '';
-                        alert('Network error during submission.');
-                    });
                 }
             }
         }
